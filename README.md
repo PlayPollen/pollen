@@ -1,11 +1,6 @@
 # 🌼 Pollen — server-authoritative multiplayer farming (scaffold)
 
-*A cozy co-op browser farming game. Built on Node/TypeScript — the name nods to
-the event loop's **poll** phase, dressed as something that grows.*
-
-A learning-first scaffold for a browser co-op farming game that borrows the
-reward architecture of slot/gacha games (variable-ratio rewards, daily streaks,
-juicy payoffs) while keeping outcomes **server-decided, honest, and testable**.
+*A cozy co-op browser farming game. Built on Node/TypeScript.*
 
 ## The one rule everything else follows
 
