@@ -1,13 +1,6 @@
 # 🌼 [PlayPollen.com](http://www.playpollen.com)
 
-*A cozy co-op browser farming game. Built on Node/TypeScript.*
-
-## The one rule everything else follows
-
-**The server is authoritative.** The client sends *intents* ("I want to harvest
-tile 3,4") and *renders* whatever state comes back. It never computes a reward,
-never edits its own wallet, never runs the RNG. This gives you three things at
-once: anti-cheat, clean multiplayer sync, and unit-testable game logic.
+*Free cozy farming game that runs in the browser. Built on Node/TypeScript.*
 
 ## Layout
 
@@ -23,6 +16,11 @@ client/
   src/net/         intents up, state + reward events down
   src/scenes/      Phaser rendering + the dopamine "juice" layer
 ```
+
+**The server is authoritative.** The client sends *intents* ("I want to harvest
+tile 3,4") and *renders* whatever state comes back. It never computes a reward,
+never edits its own wallet, never runs the RNG. This gives you three things at
+once: anti-cheat, clean multiplayer sync, and unit-testable game logic.
 
 ## Why these choices scale
 
