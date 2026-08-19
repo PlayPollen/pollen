@@ -1,4 +1,4 @@
-# 🌼 Pollen — server-authoritative multiplayer farming (scaffold)
+# 🌼 Pollen
 
 *A cozy co-op browser farming game. Built on Node/TypeScript.*
 
