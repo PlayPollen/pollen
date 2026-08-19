@@ -1,4 +1,4 @@
-# 🌼 Pollen
+# 🌼 Pollen <www.playpollen.com>
 
 *A cozy co-op browser farming game. Built on Node/TypeScript.*
 
