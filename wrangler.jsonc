@@ -1,0 +1,25 @@
+{
+  // Deploys the built client as a Cloudflare Worker serving static assets.
+  //
+  // There is no `main` entry script on purpose: Pollen is a purely static site
+  // — the whole game runs in the browser, with saves in IndexedDB — so there is
+  // no server-side code to run. Workers only require `main` when you actually
+  // need request handling.
+  "name": "pollen",
+  "compatibility_date": "2026-08-20",
+
+  "assets": {
+    // Must match the client's Vite build output. `npm run build` writes here.
+    "directory": "./client/dist",
+
+    // The game is one page with no client-side routing, so any stray URL
+    // (playpollen.com/play, a mistyped link) should land in the game rather
+    // than a bare 404.
+    //
+    // Trade-off worth knowing: this also serves index.html for a MISSING asset
+    // instead of a 404, which can mask a broken build path during debugging. If
+    // a deploy ever looks "fine but stale", check the network tab for an HTML
+    // response where a .js was expected.
+    "not_found_handling": "single-page-application"
+  }
+}
