@@ -1,7 +1,8 @@
-# 🌼 [PlayPollen.com](http://www.playpollen.com)
+# 🌼 [PlayPollen.com](https://www.playpollen.com)
 
-*🐝 A free, cozy farming game with a purpose: a share of any future profit goes to pollinator conservation.*
-*Runs in the browser. Build on Node/TypeScript.*
+*🐝 A free, cozy farming game with a purpose — a share of any future profit goes to pollinator conservation.*
+
+Runs in the browser · Built on Node/TypeScript · Open source (AGPL-3.0)
 
 ## Layout
 
