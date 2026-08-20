@@ -1,6 +1,7 @@
 # 🌼 [PlayPollen.com](http://www.playpollen.com)
 
-*Free cozy farming game that runs in the browser. Built on Node/TypeScript.*
+*🐝 A free, cozy farming game with a purpose: a share of any future profit goes to pollinator conservation.*
+*Runs in the browser. Build on Node/TypeScript.*
 
 ## Layout
 
@@ -61,9 +62,3 @@ npm test                                        # deterministic reward tests
 - **Contributing:** see `CONTRIBUTING.md`. Uses **DCO sign-off** (`git commit -s`)
   so the project's license stays clean and commercial relicensing stays possible
   later. CI enforces typecheck + lint + tests + sign-off on every PR.
-
-What a code license can and can't do for you: AGPL stops closed commercial forks
-of your *code*. It does **not** protect your game *idea* (anyone can clone the
-concept) — that's what keeping *assets* proprietary and registering a
-*trademark* on the name/logo are for. The three together (AGPL code + proprietary
-assets + trademark) are the realistic protection an open-source game has.
