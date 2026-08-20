@@ -51,15 +51,39 @@ cd server && npm run dev                        # authoritative server on :2567
 npm test                                        # deterministic reward tests
 ```
 
-## License & contributing
+## Contributing
 
-- **Code:** AGPL-3.0 (`/LICENSE`). If you run a modified version as a network
-  service, you must publish your changes. This is deliberate: it keeps the code
-  open and contributable while preventing a **closed, commercial fork of the
-  server**. Replace the placeholder LICENSE with the full official AGPL text
-  (GitHub inserts it automatically if you pick "AGPL-3.0" when creating the repo).
-- **Assets** (art, music, name, logo): **NOT** AGPL — all rights reserved. See
-  `assets/LICENSE-ASSETS.md`. A fork gets the farming *logic*, not *this game*.
-- **Contributing:** see `CONTRIBUTING.md`. Uses **DCO sign-off** (`git commit -s`)
-  so the project's license stays clean and commercial relicensing stays possible
-  later. CI enforces typecheck + lint + tests + sign-off on every PR.
+Pollen is open source and contributions are welcome — whether that's code, art,
+bug reports, or ideas. See [`CONTRIBUTING.md`](./CONTRIBUTING.md) to get started.
+
+The one rule to know: **the server is authoritative.** Game logic, rewards, and
+randomness live on the server; the client only sends intents and renders what
+comes back. It keeps the game fair, cheat-resistant, and testable — so PRs that
+respect that boundary are easy to accept.
+
+Every pull request runs through CI (typecheck, lint, and tests) and uses
+[DCO](https://developercertificate.org/) sign-off (`git commit -s`), which keeps
+the project's licensing clean.
+
+## License
+
+- **Code** is licensed under the **GNU AGPL-3.0** (see [`LICENSE`](./LICENSE)).
+  In short: you're free to use, study, modify, and share the code — but if you
+  run a modified version as a public service, you must share your changes too.
+  This keeps Pollen open for everyone while preventing closed commercial forks.
+- **Game assets** — artwork, music, sound, and the Pollen name and logo — are
+  **not** covered by the AGPL and remain © the project
+  (see [`assets/LICENSE-ASSETS.md`](./assets/LICENSE-ASSETS.md)).
+
+## Support Pollen
+
+Pollen is free to play and free to build on. If you'd like to help it grow:
+
+- 💛 **[Sponsor on GitHub](https://github.com/sponsors/PlayPollen)** — supports
+  ongoing development and hosting.
+- ☕ **[Buy us a coffee on Ko-fi](https://ko-fi.com/playpollen)** — one-off tips
+  welcome, no account needed.
+
+Contributions here help cover hosting and development. Separately, **a share of
+any future profit goes to pollinator conservation** — that pledge stands on its
+own, and we'll report publicly on it once there's revenue to share. 🐝
