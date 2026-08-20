@@ -15,13 +15,14 @@ import {
   movement,
   createFarmState,
   createPlayer,
-  fromSave,
+  loadSave,
   toSave,
   TICK_RATE,
   DEFAULT_SLOT,
   type Appearance,
   type ClientMessage,
   type FarmState,
+  type LoadResult,
   type HarvestResult,
   type HoneyResult,
   type Player,
@@ -74,15 +75,28 @@ export class LocalGame {
   static async load(store: SaveStore, slot = DEFAULT_SLOT): Promise<LocalGame> {
     let state: FarmState;
     let existed = false;
+    let result: LoadResult | undefined;
+
     try {
       const saved = await store.load(slot);
       existed = saved !== null;
-      state = fromSave(saved);
+      result = loadSave(saved);
+      state = result.state;
+      if (result.status === "migrated") {
+        console.info(`[pollen] upgraded save from version ${result.savedVersion}`);
+      }
+      if (result.message) console.warn("[pollen]", result.message);
     } catch (err) {
-      // A corrupt or unreadable save must not brick the game — start fresh and
-      // say so, rather than throwing on boot with no way back.
-      console.error("[pollen] could not read save, starting a new farm:", err);
+      // Storage itself failed. Start fresh so the game still runs, but treat the
+      // existing save as untouchable — we don't know what's in it.
+      console.error("[pollen] could not read save:", err);
       state = createFarmState();
+      result = {
+        state,
+        status: "unreadable",
+        message: "Your saved farm couldn't be opened. It has been left untouched.",
+        preserveExisting: true,
+      };
     }
 
     if (!state.players.has(LOCAL_PLAYER)) {
@@ -96,7 +110,25 @@ export class LocalGame {
     // not look like hours of banked travel.
     state.players.get(LOCAL_PLAYER)!.lastMoveAtMs = Date.now();
 
-    return new LocalGame(state, store, slot, !existed);
+    const game = new LocalGame(state, store, slot, !existed);
+    game.loadResult = result;
+    // The single most destructive thing this class could do: autosave a fresh
+    // farm over a save we failed to read. If we couldn't open it, we don't
+    // touch it — the player keeps whatever is there and can recover it later.
+    game.savingBlocked = result.preserveExisting;
+    if (game.savingBlocked) {
+      console.warn("[pollen] saving is disabled this session to protect the existing save.");
+    }
+    return game;
+  }
+
+  /** How the save loaded, so the UI can be honest about a migration or failure. */
+  loadResult?: LoadResult;
+  private savingBlocked = false;
+
+  /** True when this session will not persist — the UI should say so. */
+  get isReadOnly() {
+    return this.savingBlocked;
   }
 
   /** Apply the character creator's result and commit it straight away. */
@@ -203,9 +235,13 @@ export class LocalGame {
 
   /** Write the farm out. Skips the write when nothing has changed. */
   async save(force = false): Promise<void> {
+    // Refuses even a forced save: shutdown() forces one, and quitting is exactly
+    // when an unreadable save would get overwritten.
+    if (this.savingBlocked) return;
     if (!this.dirty && !force) return;
     this.dirty = false;
     try {
+      await this.backupOnce();
       await this.store.save(this.slot, toSave(this.state));
     } catch (err) {
       // Losing a save is bad; crashing the game over it is worse.
@@ -213,6 +249,24 @@ export class LocalGame {
       this.dirty = true; // try again on the next autosave
     }
   }
+
+  /**
+   * Before the first write following a migration, copy the pre-migration save
+   * aside. If an upgrade turns out to be wrong, the original is still there
+   * rather than already overwritten by the first autosave.
+   */
+  private async backupOnce(): Promise<void> {
+    if (this.backedUp || this.loadResult?.status !== "migrated") return;
+    this.backedUp = true;
+    try {
+      const original = await this.store.load(this.slot);
+      if (original) await this.store.save(`${this.slot}.v${this.loadResult.savedVersion}`, original);
+    } catch (err) {
+      // A failed backup shouldn't block play, but it should be loud.
+      console.error("[pollen] could not back up the pre-upgrade save:", err);
+    }
+  }
+  private backedUp = false;
 
   /** Stop the loop and flush. Call before leaving the game scene. */
   async shutdown(): Promise<void> {

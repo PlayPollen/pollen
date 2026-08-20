@@ -142,6 +142,20 @@ export class MenuScene extends Phaser.Scene {
 
       const world = await LocalGame.load(store);
 
+      // If the save couldn't be read, the session runs but won't persist. Say
+      // so before they invest an hour in a farm that will vanish.
+      if (world.isReadOnly) {
+        this.menu.locked = false;
+        this.statusText
+          .setColor("#ff8a80")
+          .setText(
+            `${world.loadResult?.message ?? "Your farm couldn't be opened."}\n` +
+              "Your existing save has NOT been changed.",
+          );
+        this.layout();
+        return;
+      }
+
       // First run only. A returning player's character is already in the save,
       // and re-running the creator would silently overwrite it.
       //
