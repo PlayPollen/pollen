@@ -1,0 +1,13 @@
+# Normalise line endings so a Windows checkout doesn't commit CRLF.
+* text=auto
+
+# These are executed by a shell, not read by an editor. CRLF endings make Linux
+# and macOS fail with "bad interpreter: /bin/sh^M" — which would break the DCO
+# hook and the setup script for every contributor not on Windows, and CI runs
+# on ubuntu.
+*.sh text eol=lf
+.githooks/** text eol=lf
+Dockerfile text eol=lf
+
+# Lockfiles are generated; collapsing them in diffs keeps reviews readable.
+package-lock.json linguist-generated=true -diff

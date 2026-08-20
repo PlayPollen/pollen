@@ -2,64 +2,92 @@
 
 *🐝 A free, cozy farming game with a purpose — a share of any future profit goes to pollinator conservation.*
 
-Runs in the browser · Built on Node/TypeScript · Open source (AGPL-3.0)
+Runs in the browser · Built on TypeScript · Open source (AGPL-3.0)
 
 ## Layout
 
+npm workspaces: `shared`, `client`. (`server/` is parked — see below.)
+
 ```
-shared/            types + constants both sides agree on (no logic)
-server/
-  src/schema/      Colyseus synced state (server-owned, auto-replicated)
-  src/systems/     ALL game rules: farming.ts (logic), rng.ts (seeded RNG)
-  src/rooms/       FarmRoom — one co-op instance; the scaling unit
-  src/persistence/ PersistencePort — the swappable-storage seam
-  src/main.ts      infra wiring (the only place you change to scale)
+shared/src/        the portable game core — no framework, no network
+  types.ts         crops, hives, constants both sides agree on
+  state.ts         plain state model + save serialisation
+  appearance.ts    character looks
+  systems/         ALL game rules: farming, beekeeping, movement, rng
+  persistence.ts   SaveStore — the swappable-storage seam
 client/
-  src/net/         intents up, state + reward events down
-  src/scenes/      Phaser rendering + the dopamine "juice" layer
+  src/game/        LocalGame: the tick loop + IndexedDB saves
+  src/scenes/      Phaser scenes: menu, character, farm, hud, pause
+  src/art/         runtime-generated character and world art
+  src/ui/          shared UI pieces
+server/            PARKED — the co-op reference. Not built or tested.
 ```
 
-**The server is authoritative.** The client sends *intents* ("I want to harvest
-tile 3,4") and *renders* whatever state comes back. It never computes a reward,
-never edits its own wallet, never runs the RNG. This gives you three things at
-once: anti-cheat, clean multiplayer sync, and unit-testable game logic.
+**The rules are the single source of truth.** Every action goes through a pure
+function in `shared/src/systems/` — the renderer only sends intents and draws
+what comes back. It never computes a reward, never edits its own wallet, never
+runs the RNG. That gives three things at once: outcomes you can reproduce from a
+seed, unit-testable game logic, and a core that can run anywhere.
+
+Today it runs in the browser, so single player needs no server at all: no
+latency, no hosting bill, and it works offline. If co-op arrives, the *same*
+rules run server-side, where being the single source of truth also makes them
+the anti-cheat boundary.
 
 ## Why these choices scale
 
-- **Colyseus** for state-sync: a farming game is low-frequency, so its automatic
-  sync overhead is a non-issue, and you get netcode for free.
-- **Rooms as the scaling unit**: scale horizontally by running many small
-  4-player rooms across many processes — never one giant world. Add a Redis
-  presence driver + more nodes; no game code changes.
-- **PersistencePort**: game logic depends on an interface, not a database. Start
-  with `InMemoryPersistence`, swap in Postgres+Redis by changing one line in
-  `main.ts`. If you'd rather not run infra, a managed BaaS adapter fits the same
-  seam.
-- **Seeded server RNG**: reproducible, auditable, unforgeable, and testable.
+- **Framework-free core**: `shared/` depends on nothing — not Phaser, not a
+  network library, not a database. That's what lets it run in a browser today
+  and on a server tomorrow without a rewrite.
+- **Seeded RNG**: reproducible, auditable, and testable. Given a seed you can
+  replay any outcome, which is priceless for "why did I get that drop?".
+- **`SaveStore`**: game logic depends on an interface, not on IndexedDB. Cloud
+  saves later are a new adapter, not a refactor.
+- **Sparse state + viewport culling**: an untouched tile costs nothing to store
+  or draw, so cost scales with what's *planted* and what's *on screen* — not
+  with the size of the map.
 
 ## Build order (don't skip ahead)
 
 1. **Single-player loop** — plant/water/harvest/daily + juice. Fun solo first.
-2. **Async shared world** — see friends' farms, gift, shared goals. Low risk.
+2. **Depth** — town, NPCs, dialogue, inventory. Where a farming game earns its
+   hours.
 3. **Realtime co-op** — multiple players live on one farm. The hard part, last.
 
 ## Run
 
 ```
-sh scripts/setup-dev.sh                        # one-time: installs deps + DCO hooks
-cd server && npm run dev                        # authoritative server on :2567
-npm test                                        # deterministic reward tests
+sh scripts/setup-dev.sh    # one-time: installs deps, builds shared, adds DCO hooks
+npm run dev                # the game on http://localhost:5173
 ```
+
+Then open <http://localhost:5173>. Controls: **WASD/arrows** walk, **1/2/3/4**
+pick tool (plant, water, harvest, hive), **Tab** cycle seed, **click** a tile
+within reach to act, **Space** claim the daily reward, **+/-** zoom, **ESC**
+pause.
+
+```
+npm test          # rules, save round-trip, movement and reach tests
+npm run lint      # eslint across all workspaces
+npm run typecheck # tsc --noEmit across all workspaces
+npm run build     # production build into client/dist
+```
+
+`shared/` compiles to `shared/dist`, so run `npm run build:shared` after
+changing it (the `dev` and `test` scripts already do this for you).
+
+Your farm saves to **IndexedDB in your browser**, not to a server — so clearing
+site data clears your farm. "New Farm" on the title screen resets it deliberately.
 
 ## Contributing
 
 Pollen is open source and contributions are welcome — whether that's code, art,
 bug reports, or ideas. See [`CONTRIBUTING.md`](./CONTRIBUTING.md) to get started.
 
-The one rule to know: **the server is authoritative.** Game logic, rewards, and
-randomness live on the server; the client only sends intents and renders what
-comes back. It keeps the game fair, cheat-resistant, and testable — so PRs that
-respect that boundary are easy to accept.
+The one rule to know: **the game rules are authoritative.** Logic, rewards, and
+randomness live in `shared/src/systems/` as pure functions; the client only
+sends intents and renders what comes back. It keeps the game fair, testable, and
+portable — so PRs that respect that boundary are easy to accept.
 
 Every pull request runs through CI (typecheck, lint, and tests) and uses
 [DCO](https://developercertificate.org/) sign-off (`git commit -s`), which keeps

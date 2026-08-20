@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# DCO sign-off hook. CONTRIBUTING.md requires every commit to carry a
+# Signed-off-by trailer (the Developer Certificate of Origin), which keeps the
+# project's licensing provenance clean. Rather than making you remember
+# `git commit -s`, this hook adds the trailer for you.
+#
+# Installed by scripts/setup-dev.sh, which points core.hooksPath at .githooks/.
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+
+# Don't touch merges or amends-of-a-merge; git generates those messages itself.
+[ "$COMMIT_SOURCE" = "merge" ] && exit 0
+
+NAME=$(git config user.name)
+EMAIL=$(git config user.email)
+
+if [ -z "$NAME" ] || [ -z "$EMAIL" ]; then
+  echo "DCO hook: git user.name / user.email are not set — cannot sign off." >&2
+  echo "  git config user.name  \"Your Name\"" >&2
+  echo "  git config user.email \"you@example.com\"" >&2
+  exit 1
+fi
+
+SOB="Signed-off-by: $NAME <$EMAIL>"
+
+# Idempotent: never add a second identical trailer on amend/rebase.
+if ! grep -qsF "$SOB" "$COMMIT_MSG_FILE"; then
+  printf '\n%s\n' "$SOB" >> "$COMMIT_MSG_FILE"
+fi

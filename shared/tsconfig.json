@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    // NodeNext, not Bundler: this package is consumed by the server as plain
+    // Node ESM, which requires explicit .js extensions on relative imports.
+    // Bundler resolution let tsc emit extensionless imports that only a bundler
+    // (or tsx) could resolve — fine in dev, broken under `node dist/main.js`.
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "strict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*.ts"]
+}

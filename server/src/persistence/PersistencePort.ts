@@ -9,7 +9,7 @@
 // This is exactly the dependency-inversion habit that also makes the systems
 // testable: in tests you pass a fake adapter.
 
-import { FarmState } from "../schema/FarmState";
+import { FarmState } from "../schema/FarmState.js";
 
 export interface SavedPlayer {
   coins: number;

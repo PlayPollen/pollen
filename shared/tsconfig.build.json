@@ -1,0 +1,10 @@
+// Production build config. Identical to tsconfig.json except that test files
+// are excluded, so dist/ never ships vitest specs (which would also drag vitest
+// into the consumer's module graph).
+//
+// tsconfig.json stays test-inclusive on purpose: `npm run typecheck` should
+// check the tests too.
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
+}

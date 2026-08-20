@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Pollen</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #1b2216;
+        overflow: hidden;
+        font-family: system-ui, sans-serif;
+        color: #e8e2cf;
+      }
+      #game {
+        width: 100%;
+        height: 100%;
+      }
+      /* Shown until the Phaser canvas takes over, and used to surface
+         connection failures — otherwise a dead server just looks like a
+         black screen. */
+      #boot {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-content: center;
+        text-align: center;
+        gap: 0.5rem;
+        pointer-events: none;
+      }
+      #boot.hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game"></div>
+    <div id="boot">
+      <div style="font-size: 2rem">🌼</div>
+      <div id="boot-msg">Connecting to your farm…</div>
+    </div>
+    <!--
+      Surface startup failures. If a module fails to evaluate (a missing export
+      after `shared` is rebuilt is the classic one), main.ts never runs at all,
+      so its own try/catch can't help — the page would just sit on "Connecting…"
+      forever with the real error only visible in the devtools console.
+      This must be a plain inline script so it is installed before the module
+      script is evaluated.
+    -->
+    <script>
+      (function () {
+        function show(what, err) {
+          var el = document.getElementById("boot-msg");
+          if (!el) return;
+          document.getElementById("boot").classList.remove("hidden");
+          el.innerHTML =
+            "<strong>" + what + "</strong><br><code style='font-size:0.8em'>" +
+            String((err && (err.message || err)) || "unknown error") +
+            "</code><br><br>Check the browser console for the full trace.";
+        }
+        window.addEventListener("error", function (e) {
+          show("Failed to start", e.error || e.message);
+        });
+        window.addEventListener("unhandledrejection", function (e) {
+          show("Failed to start", e.reason);
+        });
+      })();
+    </script>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

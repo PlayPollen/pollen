@@ -1,39 +1,37 @@
-// Client networking. Note what this file does NOT do: it never computes a
-// yield, never decides if a harvest succeeded, never touches coins. It sends
-// intents up and renders whatever authoritative state comes down. The reward
-// *feeling* is client-side; the reward *truth* is server-side.
+// Intent plumbing.
+//
+// This file used to own the Colyseus connection. Single player runs the rules
+// locally now (see game/LocalGame.ts), so what's left is the thin seam the
+// scenes talk through: send intents up, get reward events back.
+//
+// The shape is unchanged on purpose. If co-op arrives, a networked
+// implementation slots in behind these same two functions and the scenes don't
+// need to know.
 
-import { Client, Room } from "colyseus.js";
-import { ClientMessage } from "../../../shared/types";
+import type { ClientMessage, HarvestResult, HoneyResult } from "@pollen/shared";
+import type { LocalGame } from "../game/LocalGame";
 
-export interface HarvestResult {
-  ok: boolean; amount: number; rare: boolean; coins: number;
+export type { HarvestResult, HoneyResult };
+
+/** Thin helper so scenes just call sendAction({type:'plant',...}). */
+export function sendAction(game: LocalGame, msg: ClientMessage) {
+  game.send(msg);
 }
 
-export async function connect(userId: string, name: string) {
-  const client = new Client(
-    (import.meta as any).env?.VITE_SERVER_URL ?? "ws://localhost:2567"
-  );
-  const room: Room = await client.joinOrCreate("farm", { userId, name });
-  return room;
-}
-
-// Thin helper so scenes just call sendAction({type:'plant',...}).
-export function sendAction(room: Room, msg: ClientMessage) {
-  room.send("action", msg);
-}
-
-// Wire the juicy one-shot reward events. The scene passes callbacks that fire
-// the screen shake / coin shower / RARE banner. Keeping this separate from
-// state sync is deliberate: state tells you WHAT the world is; these events
-// tell you WHEN to celebrate.
+/**
+ * Wire the juicy one-shot reward events. Keeping these separate from state is
+ * deliberate: state tells you WHAT the world is; these tell you WHEN to
+ * celebrate.
+ */
 export function onRewards(
-  room: Room,
+  game: LocalGame,
   handlers: {
     onHarvest: (r: HarvestResult) => void;
+    onHoney: (h: HoneyResult) => void;
     onDaily: (d: { reward: number; streak: number }) => void;
   },
 ) {
-  room.onMessage("harvestResult", handlers.onHarvest);
-  room.onMessage("dailyResult", handlers.onDaily);
+  game.on("harvest", handlers.onHarvest);
+  game.on("honey", handlers.onHoney);
+  game.on("daily", handlers.onDaily);
 }

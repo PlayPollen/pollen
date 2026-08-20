@@ -1,0 +1,21 @@
+{
+  "name": "@pollen/client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pollen browser client — Phaser rendering over authoritative server state",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@pollen/shared": "*",
+    "phaser": "^3.86.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0"
+  }
+}

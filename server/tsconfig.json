@@ -1,8 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "bundler",
+    // NodeNext, not bundler: the built output is run directly by Node
+    // (`node dist/main.js`), which needs explicit .js extensions on relative
+    // imports. With bundler resolution tsc happily emitted extensionless
+    // imports that only tsx could resolve — dev worked, production did not.
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "lib": ["ES2022"],
     "types": ["node"],
     "outDir": "dist",
@@ -20,6 +24,6 @@
 
     "useDefineForClassFields": false
   },
-  "include": ["src/**/*.ts", "../shared/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
