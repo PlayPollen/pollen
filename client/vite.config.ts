@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
 
-// The server URL is the only build-time knob: localhost in dev, wss://api.…
-// in production. Everything else about the client is static.
-export default defineConfig({
+// The client builds to fully static files — there is no server URL or API
+// endpoint to configure. The whole game runs in the browser.
+export default defineConfig(({ mode }) => ({
   server: {
     port: 5173,
     watch: {
@@ -21,6 +21,14 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
-    sourcemap: true,
+
+    // Off for production: the sourcemap is ~10MB against a ~1.5MB bundle, so it
+    // was 87% of every deploy for something almost nobody downloads.
+    //
+    // `npm run build:debug` turns it back on. That uses Vite's --mode rather
+    // than an env var so it behaves the same on Windows and Linux, and "debug"
+    // (not "development") keeps minification and NODE_ENV=production intact —
+    // the point is to debug the REAL production bundle, not a different one.
+    sourcemap: mode === "debug",
   },
-});
+}));

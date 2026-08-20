@@ -71,7 +71,12 @@ npm test          # rules, save round-trip, movement and reach tests
 npm run lint      # eslint across all workspaces
 npm run typecheck # tsc --noEmit across all workspaces
 npm run build     # production build into client/dist
+npm run deploy    # build + deploy to Cloudflare Workers
 ```
+
+Production builds ship without sourcemaps — the map is ~10MB against a ~1.5MB
+bundle. `npm run build:debug` produces the *same* bundle with its sourcemap,
+for when a production-only bug needs a readable stack trace.
 
 `shared/` compiles to `shared/dist`, so run `npm run build:shared` after
 changing it (the `dev` and `test` scripts already do this for you).
