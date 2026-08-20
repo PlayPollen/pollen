@@ -8,6 +8,11 @@
   "name": "pollen",
   "compatibility_date": "2026-08-20",
 
+  // Keeps the free https://pollen.<subdomain>.workers.dev URL alive. It's the
+  // shareable playtest link and needs no DNS, so it stays on even after a
+  // custom domain is added — losing it would break any link already shared.
+  "workers_dev": true,
+
   "assets": {
     // Must match the client's Vite build output. `npm run build` writes here.
     "directory": "./client/dist",
